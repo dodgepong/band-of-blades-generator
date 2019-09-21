@@ -15,18 +15,17 @@ import Url exposing (Url)
 type Model
     = Redirect Nav.Key
     | NotFound Nav.Key
-    | Home
-    | Missions
-    | Characters
+    | Home Nav.Key
+    | Missions Nav.Key
+    | Characters Nav.Key
 
 
 init : Value -> Url -> Nav.Key -> ( Model, Cmd Msg )
-init value url navKey =
-    ( Home, Cmd.none )
+init _ url navKey =
+    changeRouteTo (Route.fromUrl url) (Redirect navKey)
 
 
 
---changeRouteTo (Route.fromUrl url) Redirect
 -- VIEW
 
 
@@ -46,14 +45,43 @@ type Msg
     | ClickedLink Browser.UrlRequest
 
 
+changeRouteTo : Maybe Route -> Model -> ( Model, Cmd Msg )
+changeRouteTo maybeRoute model =
+    let
+        navKey =
+            toNavKey model
+    in
+    case maybeRoute of
+        Nothing ->
+            ( NotFound navKey, Cmd.none )
 
--- changeRouteTo : Maybe Route -> Model -> ( Model, Cmd Msg )
--- changeRouteTo maybeRoute model =
---     case maybeRoute of
---         Nothing ->
---             ( NotFound, Cmd.none )
---         Just Route.Home ->
---             ( model, Route.replaceUrl )
+        Just Route.Home ->
+            ( Home navKey, Cmd.none )
+
+        Just Route.Missions ->
+            ( Missions navKey, Cmd.none )
+
+        Just Route.Characters ->
+            ( Characters navKey, Cmd.none )
+
+
+toNavKey : Model -> Nav.Key
+toNavKey model =
+    case model of
+        Redirect navKey ->
+            navKey
+
+        NotFound navKey ->
+            navKey
+
+        Home navKey ->
+            navKey
+
+        Missions navKey ->
+            navKey
+
+        Characters navKey ->
+            navKey
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -66,7 +94,7 @@ update msg model =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
     Sub.none
 
 
